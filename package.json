@@ -1,0 +1,20 @@
+{
+  "name": "agentos",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.26.1",
+  "scripts": {
+    "typecheck:libs": "tsc --build",
+    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --if-present run typecheck",
+    "codegen": "pnpm --filter @workspace/api-spec run codegen",
+    "build": "pnpm run typecheck && pnpm --filter @workspace/agent-platform run build && pnpm --filter @workspace/api-server run build",
+    "dev:web": "pnpm --filter @workspace/agent-platform run dev",
+    "dev:api": "pnpm --filter @workspace/api-server run dev",
+    "start": "node --enable-source-maps artifacts/api-server/dist/index.mjs",
+    "test": "pnpm --filter @workspace/api-server test"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.2",
+    "prettier": "^3.8.1"
+  }
+}

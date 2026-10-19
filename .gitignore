@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.env
+.env.*
+*.pem
+*.key
+*.p8
+*.p12
+credentials.json
+.cache/
+.local/
+.DS_Store

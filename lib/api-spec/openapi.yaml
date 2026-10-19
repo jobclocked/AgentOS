@@ -1,0 +1,827 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: AgentOS API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: agents
+    description: Agent management
+  - name: deployments
+    description: Agent deployments
+  - name: runs
+    description: Agent execution runs
+  - name: tools
+    description: Tools available to agents
+  - name: analytics
+    description: Analytics and metrics
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags:
+        - health
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /agents:
+    get:
+      operationId: listAgents
+      tags:
+        - agents
+      summary: List all agents
+      responses:
+        "200":
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Agent"
+    post:
+      operationId: createAgent
+      tags:
+        - agents
+      summary: Create a new agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAgentBody"
+      responses:
+        "201":
+          description: Created agent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /agents/{id}:
+    get:
+      operationId: getAgent
+      tags:
+        - agents
+      summary: Get agent by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Agent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateAgent
+      tags:
+        - agents
+      summary: Update an agent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAgentBody"
+      responses:
+        "200":
+          description: Updated agent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteAgent
+      tags:
+        - agents
+      summary: Delete an agent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /agents/{id}/duplicate:
+    post:
+      operationId: duplicateAgent
+      tags:
+        - agents
+      summary: Duplicate an agent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Duplicated agent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /deployments:
+    get:
+      operationId: listDeployments
+      tags:
+        - deployments
+      summary: List all deployments
+      responses:
+        "200":
+          description: List of deployments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Deployment"
+    post:
+      operationId: createDeployment
+      tags:
+        - deployments
+      summary: Deploy an agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDeploymentBody"
+      responses:
+        "201":
+          description: Created deployment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deployment"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /deployments/{id}:
+    get:
+      operationId: getDeployment
+      tags:
+        - deployments
+      summary: Get deployment by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deployment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deployment"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateDeployment
+      tags:
+        - deployments
+      summary: Update a deployment (e.g. pause/resume)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDeploymentBody"
+      responses:
+        "200":
+          description: Updated deployment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deployment"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteDeployment
+      tags:
+        - deployments
+      summary: Delete a deployment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /runs:
+    get:
+      operationId: listRuns
+      tags:
+        - runs
+      summary: List agent runs
+      parameters:
+        - name: agentId
+          in: query
+          required: false
+          schema:
+            type:
+              - integer
+              - "null"
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type:
+              - integer
+              - "null"
+      responses:
+        "200":
+          description: List of runs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Run"
+    post:
+      operationId: createRun
+      tags:
+        - runs
+      summary: Trigger an agent run
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRunBody"
+      responses:
+        "201":
+          description: Created run
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Run"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /runs/{id}:
+    get:
+      operationId: getRun
+      tags:
+        - runs
+      summary: Get run by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Run
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Run"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /tools:
+    get:
+      operationId: listTools
+      tags:
+        - tools
+      summary: List available tools
+      responses:
+        "200":
+          description: List of tools
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tool"
+  /analytics/dashboard:
+    get:
+      operationId: getDashboardStats
+      tags:
+        - analytics
+      summary: Get dashboard summary statistics
+      responses:
+        "200":
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+  /analytics/runs-over-time:
+    get:
+      operationId: getRunsOverTime
+      tags:
+        - analytics
+      summary: Get runs grouped by day for charts
+      responses:
+        "200":
+          description: Runs over time
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RunsOverTimePoint"
+  /analytics/agent-performance:
+    get:
+      operationId: getAgentPerformance
+      tags:
+        - analytics
+      summary: Get per-agent performance metrics
+      responses:
+        "200":
+          description: Agent performance
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AgentPerformance"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    Agent:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        goal:
+          type: string
+        model:
+          type: string
+        status:
+          type: string
+          enum:
+            - draft
+            - active
+            - paused
+            - archived
+        instructions:
+          type: string
+        tools:
+          type: array
+          items:
+            type: string
+        temperature:
+          type: number
+        maxTokens:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - description
+        - goal
+        - model
+        - status
+        - instructions
+        - tools
+        - temperature
+        - maxTokens
+        - createdAt
+        - updatedAt
+    CreateAgentBody:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        goal:
+          type: string
+        model:
+          type: string
+        instructions:
+          type: string
+        tools:
+          type: array
+          items:
+            type: string
+        temperature:
+          type: number
+        maxTokens:
+          type: integer
+      required:
+        - name
+        - description
+        - goal
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    UpdateAgentBody:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        goal:
+          type: string
+        model:
+          type: string
+        status:
+          type: string
+          enum:
+            - draft
+            - active
+            - paused
+            - archived
+        instructions:
+          type: string
+        tools:
+          type: array
+          items:
+            type: string
+        temperature:
+          type: number
+        maxTokens:
+          type: integer
+    Deployment:
+      type: object
+      properties:
+        id:
+          type: integer
+        agentId:
+          type: integer
+        agentName:
+          type: string
+        environment:
+          type: string
+          enum:
+            - development
+            - staging
+            - production
+        status:
+          type: string
+          enum:
+            - active
+            - paused
+            - stopped
+            - failed
+        trigger:
+          type: string
+          enum:
+            - manual
+            - scheduled
+            - webhook
+            - event
+        schedule:
+          type:
+            - string
+            - "null"
+        webhookUrl:
+          type:
+            - string
+            - "null"
+        lastRunAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        runCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - agentId
+        - agentName
+        - environment
+        - status
+        - trigger
+        - schedule
+        - webhookUrl
+        - lastRunAt
+        - runCount
+        - createdAt
+        - updatedAt
+    CreateDeploymentBody:
+      type: object
+      properties:
+        agentId:
+          type: integer
+        environment:
+          type: string
+          enum:
+            - development
+            - staging
+            - production
+        trigger:
+          type: string
+          enum:
+            - manual
+            - scheduled
+            - webhook
+            - event
+        schedule:
+          type:
+            - string
+            - "null"
+        webhookUrl:
+          type:
+            - string
+            - "null"
+      required:
+        - agentId
+        - environment
+        - trigger
+    UpdateDeploymentBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - active
+            - paused
+            - stopped
+            - failed
+        schedule:
+          type:
+            - string
+            - "null"
+    Run:
+      type: object
+      properties:
+        id:
+          type: integer
+        agentId:
+          type: integer
+        agentName:
+          type: string
+        deploymentId:
+          type:
+            - integer
+            - "null"
+        status:
+          type: string
+          enum:
+            - pending
+            - running
+            - success
+            - failed
+            - cancelled
+        input:
+          type:
+            - string
+            - "null"
+        output:
+          type:
+            - string
+            - "null"
+        errorMessage:
+          type:
+            - string
+            - "null"
+        tokensUsed:
+          type:
+            - integer
+            - "null"
+        durationMs:
+          type:
+            - integer
+            - "null"
+        startedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        completedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - agentId
+        - agentName
+        - deploymentId
+        - status
+        - input
+        - output
+        - errorMessage
+        - tokensUsed
+        - durationMs
+        - startedAt
+        - completedAt
+        - createdAt
+    CreateRunBody:
+      type: object
+      properties:
+        agentId:
+          type: integer
+        deploymentId:
+          type:
+            - integer
+            - "null"
+        input:
+          type:
+            - string
+            - "null"
+      required:
+        - agentId
+    Tool:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        icon:
+          type: string
+        isBuiltin:
+          type: boolean
+      required:
+        - id
+        - name
+        - description
+        - category
+        - icon
+        - isBuiltin
+    DashboardStats:
+      type: object
+      properties:
+        totalAgents:
+          type: integer
+        activeAgents:
+          type: integer
+        totalDeployments:
+          type: integer
+        activeDeployments:
+          type: integer
+        totalRuns:
+          type: integer
+        successfulRuns:
+          type: integer
+        failedRuns:
+          type: integer
+        totalTokensUsed:
+          type: integer
+        avgRunDurationMs:
+          type: integer
+        runsToday:
+          type: integer
+      required:
+        - totalAgents
+        - activeAgents
+        - totalDeployments
+        - activeDeployments
+        - totalRuns
+        - successfulRuns
+        - failedRuns
+        - totalTokensUsed
+        - avgRunDurationMs
+        - runsToday
+    RunsOverTimePoint:
+      type: object
+      properties:
+        date:
+          type: string
+        runs:
+          type: integer
+        successful:
+          type: integer
+        failed:
+          type: integer
+      required:
+        - date
+        - runs
+        - successful
+        - failed
+    AgentPerformance:
+      type: object
+      properties:
+        agentId:
+          type: integer
+        agentName:
+          type: string
+        totalRuns:
+          type: integer
+        successRate:
+          type: number
+        avgDurationMs:
+          type: integer
+        totalTokensUsed:
+          type: integer
+      required:
+        - agentId
+        - agentName
+        - totalRuns
+        - successRate
+        - avgDurationMs
+        - totalTokensUsed

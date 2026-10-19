@@ -1,0 +1,15 @@
+import { Router, type IRouter } from "express";
+import healthRouter from "./health";
+import agentsRouter from "./agents";
+import deploymentsRouter from "./deployments";
+import runsRouter from "./runs";
+import toolsRouter from "./tools";
+import analyticsRouter from "./analytics";
+const router: IRouter = Router();
+router.use(healthRouter);
+router.use(agentsRouter);
+router.use(deploymentsRouter);
+router.use(runsRouter);
+router.use(toolsRouter);
+router.use(analyticsRouter);
+export default router;
